@@ -2,20 +2,22 @@ import subprocess
 import time
 import random
 
-# Network interface name (e.g., "Ethernet" or "Wi-Fi")
-interface_name = "Wi-Fi"
+# Network interface name (e.g., "eth0" or "wlan0")
+interface_name = "eth0"
 
 while True:
     try:
-        # Generate a random MAC address (for demonstration purposes)
-        new_mac = "02"
-        for _ in range(5):
-            new_mac += f":{random.randint(0, 255):02X}"
+        # Generate a random MAC address
+        new_mac = ":".join([f"{random.randint(0, 255):02x}" for _ in range(6)])
         
-        # Change the MAC address using netsh
-        subprocess.run(["netsh", "interface", "set", "interface", interface_name, "admin=disable"])
-        subprocess.run(["netsh", "interface", "set", "interface", interface_name, "newmac=" + new_mac])
-        subprocess.run(["netsh", "interface", "set", "interface", interface_name, "admin=enable"])
+        # Disable the network interface
+        subprocess.run(["sudo", "ifconfig", interface_name, "down"])
+        
+        # Change the MAC address
+        subprocess.run(["sudo", "ifconfig", interface_name, "hw", "ether", new_mac])
+        
+        # Enable the network interface
+        subprocess.run(["sudo", "ifconfig", interface_name, "up"])
         
         print(f"Changed MAC address to {new_mac}")
         
